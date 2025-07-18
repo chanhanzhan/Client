@@ -52,9 +52,9 @@ jobs:
         uses: actions/checkout@v3  # Updated to v3
 
       - name: Set up GitHub CLI
-        uses: cli/cli@v2.7.0  # 使用正确的 GitHub CLI Action
+        uses: actions/setup-cli@v2  # 使用 GitHub CLI Action 安装 GitHub CLI
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub Token
+          cli-version: 'latest'  # 或者你可以设置特定版本
 
       - name: Create a new Git tag
         run: |
