@@ -19,12 +19,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Updated to v3
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3  # Updated to v3
         with:
-          go-version: '1.20'  # 设置Go版本，可以根据需要修改
+          go-version: '1.20'  # 设置Go版本，根据需要修改
 
       - name: Cache Go modules
         uses: actions/cache@v3  # Updated to v3
@@ -49,7 +49,7 @@ jobs:
     needs: build
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Updated to v3
 
       - name: Set up GitHub CLI
         uses: cli/cli@v2.7.0
@@ -58,9 +58,12 @@ jobs:
 
       - name: Create a new Git tag
         run: |
-          VERSION=$(date +'%Y%m%d%H%M%S')  # 根据日期生成一个标签，或者您可以根据其他需求生成标签
-          git tag -a v${VERSION} -m "Release v${VERSION}"
-          git push origin v${VERSION}
+          VERSION=$(git describe --tags --abbrev=0)  # 获取最新的标签版本
+          if [ -z "$VERSION" ]; then
+            VERSION="v1.0.0"  # 默认标签版本
+          fi
+          git tag -a v${VERSION} -m "Release v${VERSION}"  # 创建标签
+          git push origin v${VERSION}  # 推送标签
 
       - name: Create a Release
         run: |
