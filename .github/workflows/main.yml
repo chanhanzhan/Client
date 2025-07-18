@@ -56,6 +56,12 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Create a new Git tag
+        run: |
+          VERSION=$(date +'%Y%m%d%H%M%S')  # 根据日期生成一个标签，或者您可以根据其他需求生成标签
+          git tag -a v${VERSION} -m "Release v${VERSION}"
+          git push origin v${VERSION}
+
       - name: Create a Release
         run: |
           VERSION=$(git describe --tags --abbrev=0)
