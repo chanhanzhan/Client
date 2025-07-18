@@ -1,4 +1,4 @@
-name: Go Build and Release
+name: Go Build
 
 on:
   push:
@@ -7,8 +7,6 @@ on:
   pull_request:
     branches:
       - main
-  release:
-    types: [created]
 
 jobs:
   build:
@@ -40,45 +38,6 @@ jobs:
         run: |
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags="-s -w" -trimpath -buildmode=pie -o dist/Client-${{ matrix.goarch }}
 
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4  # 使用最新版的上传构建产物
-        with:
-          name: Client-${{ matrix.goarch }}
-          path: dist/Client-${{ matrix.goarch }}
-
-  release:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3  # 使用最新版的 checkout
-
-      - name: Install GitHub CLI
+      - name: Print Build Output
         run: |
-          # 安装 GitHub CLI（gh）
-          sudo apt-get install gh
-
-      - name: Set up Git user
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"  # 设置用户名和邮箱
-
-      - name: Create a new Git tag
-        run: |
-          # 使用当前日期生成标签，格式为 YYYYMMDDHHMMSS
-          VERSION=$(date +'%Y%m%d%H%M%S')  # 格式为 YYYYMMDDHHMMSS
-          echo "Creating tag: v${VERSION}"
-
-          # 检查标签是否已经存在
-          if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
-            echo "Tag v${VERSION} already exists, skipping..."
-          else
-            # 创建标签并推送
-            git tag -a v${VERSION} -m "Release v${VERSION}"
-            git push origin v${VERSION}
-          fi
-
-      - name: Create a Release
-        run: |
-          VERSION=$(date +'%Y%m%d%H%M%S')  # 使用日期生成标签
-          gh release create v${VERSION} dist/* --title "Release v${VERSION}" --notes "Release v${VERSION}"
+          ls -lh dist/Client-${{ matrix.goarch }}  # 查看生成的二进制文件

@@ -63,20 +63,22 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"  # 设置用户名和邮箱
 
-      - name: Authenticate with GitHub
-        run: |
-          git config --global credential.helper store
-          echo "https://${{ secrets.GITHUB_TOKEN }}@github.com" > ~/.git-credentials
-
       - name: Create a new Git tag
         run: |
-          # 使用当前日期生成标签
+          # 使用当前日期生成标签，格式为 YYYYMMDDHHMMSS
           VERSION=$(date +'%Y%m%d%H%M%S')  # 格式为 YYYYMMDDHHMMSS
           echo "Creating tag: v${VERSION}"
-          git tag -a v${VERSION} -m "Release v${VERSION}"  # 创建标签
-          git push origin v${VERSION}  # 推送标签
+
+          # 检查标签是否已经存在
+          if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${VERSION} already exists, skipping..."
+          else
+            # 创建标签并推送
+            git tag -a v${VERSION} -m "Release v${VERSION}"
+            git push origin v${VERSION}
+          fi
 
       - name: Create a Release
         run: |
-          VERSION=$(date +'%Y%m%d%H%M%S')  # 使用日期格式创建标签
+          VERSION=$(date +'%Y%m%d%H%M%S')  # 使用日期生成标签
           gh release create v${VERSION} dist/* --title "Release v${VERSION}" --notes "Release v${VERSION}"
